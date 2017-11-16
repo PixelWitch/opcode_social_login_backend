@@ -18,7 +18,6 @@ module Api
           redirect_to: @redirect_path
         }
       end
-
       def sso
         set_sso_response
         render json: { redirect_to: @redirect_path }

@@ -10,6 +10,7 @@ end
 
 gem 'active_model_serializers'
 gem 'acts-as-taggable-on', '~> 5.0'
+gem 'byebug'
 gem 'devise'
 gem 'geocoder'
 gem 'gibbon'
@@ -28,6 +29,7 @@ gem 'redis', '~> 3.0'
 gem 'sendgrid-ruby'
 gem 'sentry-raven'
 gem 'sidekiq'
+gem 'omniauth-google-oauth2'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -49,5 +51,3 @@ end
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
-
-

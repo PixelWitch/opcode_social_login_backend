@@ -1,5 +1,28 @@
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
+module OmniAuth
+  module Strategies
+    class GoogleOauth2
+      def get_access_token(request)
+        code =  request.body.read
+        render code
+        json = JSON.parse(request.body.read)
+        json = json.dup.deep_transform_keys { |key| key.to_s.underscore }
+        raise "invalid token '#{json['access_token']}'" unless verify_token(json['access_token'])
+        ::OAuth2::AccessToken.from_hash(client, json)
+      end
+    end
+  end
+end
+Rails.application.config.to_prepare do
+        # to_prepare ensures that the monkey patching happens before the first request
+  Devise::OmniauthCallbacksController.class_eval do # reopen the class
+    def failure                                     # redefine the failure method
+      set_flash_message! :alert, :failure, kind: OmniAuth::Utils.camelize(failed_strategy.name), reason: failure_message
+      redirect_to after_omniauth_failure_path_for(resource_name)
+    end
+  end
+end
 Devise.setup do |config|
   # The secret key used by Devise. Devise uses this key to generate
   # random tokens. Changing this key will render invalid all existing
@@ -253,6 +276,7 @@ Devise.setup do |config|
   # Add a new OmniAuth provider. Check the wiki for more information on setting
   # up on your models and hooks.
   # config.omniauth :github, 'APP_ID', 'APP_SECRET', scope: 'user,public_repo'
+  config.omniauth :google_oauth2, ENV["GOOGLE_ID"], ENV["GOOGLE_SECRET"], {callback_url: "http://localhost:3000/users/auth/google_oauth2/callback",provider_ignores_state: true}
 
   # ==> Warden configuration
   # If you want to use other strategies, that are not supported by Devise, or

@@ -2,7 +2,7 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
+         :recoverable, :rememberable, :trackable, :validatable, :omniauthable, omniauth_providers: [:google_oauth2]
 
   geocoded_by :zip do |user, results|
     geocoded_object = results.first
@@ -107,5 +107,34 @@ class User < ApplicationRecord
 
   def downcase_email
     email.downcase! if email
+  end
+
+  def self.from_social(data)
+    Rails.logger.info "************ email is = #{data[:email]}"
+    user = User.where(email: data[:email]).first
+
+    # Uncomment the section below if you want users to be created if they don't exist
+     unless user
+         user = User.create(first_name: data[:first_name],
+            last_name: data[:last_name],
+            email: data[:email],
+            password: Devise.friendly_token[0,20]
+         )
+     end
+     user
+  end
+  def self.from_omniauth(access_token)
+    data = access_token.info
+    user = User.where(email: data['email']).first
+
+    # Uncomment the section below if you want users to be created if they don't exist
+     unless user
+         user = User.create(name: data['name'],
+            email: data['email'],
+            password: Devise.friendly_token[0,20]
+         )
+     end
+    puts access_token.info
+    user
   end
 end

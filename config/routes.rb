@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
 
-  devise_for :users
+  devise_for :users, controllers: { omniauth_callbacks: 'users/omniauth_callbacks' }
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   namespace :api do
@@ -10,8 +10,9 @@ Rails.application.routes.draw do
 
       get '/users/by_location', to: 'users#by_location'
       post '/users/profile/verify', to: 'users#verify'
+      post '/users/social', to: 'users#social'
 
-      resources :code_schools do 
+      resources :code_schools do
         resources :locations
       end
       resources :scholarships, only: [:index, :show]
@@ -33,6 +34,7 @@ Rails.application.routes.draw do
       resources :team_members, only: [:index, :create, :update, :destroy]
       resources :users, only: [:index, :create]
       patch '/users', to: 'users#update'
+
 
       devise_scope :user do
         post '/sessions', to: 'sessions#create'
